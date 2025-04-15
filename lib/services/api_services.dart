@@ -3,7 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.54:5000/';
+  static const String baseUrl = 'http://192.168.1.57:5000/';
+  static const String baseUrlImg =
+      'https://passionne12-staging.s3.eu-west-1.amazonaws.com';
 
   static Future<String?> getDataFromShared(String key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -21,7 +23,7 @@ class ApiService {
   }
 
   static Future<String?> verifToken() async {
-    String? token = getDataFromShared('connected_jwt_token') as String?;
+    String? token = await getDataFromShared('connected_jwt_token');
 
     if (token == null || token.isEmpty) return null;
 
@@ -36,7 +38,6 @@ class ApiService {
     if (response.statusCode == 200) {
       return token;
     } else {
-      // removeDataFromShared('connected_jwt_token');
       return null;
     }
   }

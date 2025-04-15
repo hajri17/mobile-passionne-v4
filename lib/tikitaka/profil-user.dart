@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:passione_app/widget/colors_page.dart';
 import 'package:passione_app/widget/widget_page.dart';
 
-class UserSettingsPage extends StatelessWidget {
+class UserSettingsPage extends StatefulWidget {
   const UserSettingsPage({super.key});
+
+  @override
+  State<UserSettingsPage> createState() => _UserSettingsPageState();
+}
+
+class _UserSettingsPageState extends State<UserSettingsPage> {
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +48,10 @@ class UserSettingsPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16.0),
-                  buildTextField('NOM', 'Chiheb Mouelhi'),
+                  buildTextField('NOM & PRÉNOM', 'Chiheb Mouelhi'),
                   buildTextField('EMAIL', 'chihebmouelhi@gmail.com'),
                   buildTextField('Mot de passe', '********', isPassword: true),
-                  buildTextField('DATE ', '23/05/1995'),
+                  buildTextField('DATE', '23/05/1995'),
                   buildTextField('PAYS/RÉGION', 'Tunisie, Sousse'),
                   const SizedBox(height: 16.0),
                   CustomButton(
@@ -81,7 +88,7 @@ class UserSettingsPage extends StatelessWidget {
             ),
           ),
           TextField(
-            obscureText: isPassword,
+            obscureText: isPassword ? !_isPasswordVisible : false,
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.cardBackground,
@@ -95,10 +102,19 @@ class UserSettingsPage extends StatelessWidget {
                 color: AppColors.textPrimary,
                 fontSize: 14,
               ),
-              suffixIcon: (isPassword)
-                  ? const Icon(
-                      Icons.visibility,
-                      color: AppColors.cardBackground,
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: AppColors.textPrimary,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
                     )
                   : null,
             ),

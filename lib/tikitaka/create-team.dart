@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:passione_app/services/api_services.dart';
 import 'package:passione_app/tikitaka/add-player.dart';
-import 'package:passione_app/tikitaka/team-data.dart';
+import 'package:passione_app/tikitaka/tikitaka.dart';
 import 'package:passione_app/widget/colors_page.dart';
 import 'package:passione_app/widget/widget_page.dart';
 
 class CreateTeamScreen extends StatefulWidget {
-  final Map<String, dynamic> player;
-  final int rowIndex;
-  final int columnIndex;
-
   const CreateTeamScreen({
     super.key,
-    required this.player,
-    required this.rowIndex,
-    required this.columnIndex,
   });
 
   @override
@@ -22,16 +15,7 @@ class CreateTeamScreen extends StatefulWidget {
 }
 
 class _CreateTeamScreenState extends State<CreateTeamScreen> {
-  List<Map<String, String>> playerList = [
-    {"id": "1", "image": "assets/images/player_avatar.png"},
-    {"id": "2", "image": "assets/images/player_avatar.png"},
-    {"id": "3", "image": "assets/images/player_avatar.png"},
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  Map<String, Map<String, dynamic>> selectedPlayers = {};
 
   void showSuccessPopup(BuildContext context) {
     showDialog(
@@ -78,6 +62,12 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
               margin: EdgeInsets.zero,
               child: TextButton(
                 onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TikitakaPage(),
+                    ),
+                  );
                   Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
@@ -244,7 +234,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
               children: [
                 TextButton(
                   onPressed: () {
-                    TeamData().removeAllPlayer();
+                    selectedPlayers.clear();
                     setState(() {});
                   },
                   style: TextButton.styleFrom(
@@ -270,41 +260,68 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     onPressed: () async {
                       String? userId =
                           await ApiService.getDataFromShared('connected_id');
+                      String selectedJournee = 'Journée 1';
+
+                      // String? selectedJournee = await ApiService.getDataFromShared('round');
 
                       if (userId == null) {
                         return;
                       }
 
-                      List<String> playersList = TeamData()
-                          .selectedPlayers
-                          .values
-                          .expand(
-                              (players) => players.map((playerId) => playerId))
-                          .toList();
-
                       Map<String, dynamic> requestBody = {
                         "points": 100,
-                        "round": "Journée 1",
-                        "user_id": userId,
-                        "players": playersList,
+                        "round": selectedJournee,
+                        "userId": userId,
+                        "players": selectedPlayers.values
+                            .map((p) => {
+                                  "player": p['_id'],
+                                  "rowIndex": p['rowIndex'],
+                                  "columnIndex": p['columnIndex'],
+                                  "isSubstituted": p['rowIndex'] >= 4,
+                                })
+                            .toList(),
                       };
 
-                      print('requestBody: $requestBody');
-                      if (TeamData().getTotalPlayersCount() == 15) {
-                        // try {
-                        //   final response =
-                        //       await ApiService.post('/save-team', requestBody);
+                      if (selectedPlayers.length == 15) {
+                        try {
+                          final response =
+                              await ApiService.post('pickteam', requestBody);
 
-                        //   if (response.statusCode == 200) {
-                        //     print('Players saved successfully!');
-                        //     if (!mounted) return;
-                        //     showSuccessPopup(context);
-                        //   } else {
-                        //     print('Failed to save players: ${response.body}');
-                        //   }
-                        // } catch (e) {
-                        //   print('Error saving players: $e');
-                        // }
+                          if (response.statusCode == 201) {
+                            if (!mounted) return;
+                            showSuccessPopup(context);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                margin: const EdgeInsets.all(20),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                content: const Text(
+                                  "Erruer lors d'enregistrement d'equipe",
+                                ),
+                                backgroundColor: AppColors.alertRed,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          print('Error saving players: $e');
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              margin: const EdgeInsets.all(20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              content: const Text(
+                                "Erruer lors serveur",
+                              ),
+                              backgroundColor: AppColors.alertRed,
+                            ),
+                          );
+                        }
                       } else {
                         if (!mounted) return;
 
@@ -355,82 +372,123 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
       children: List.generate(
         positions.length,
         (columnIndex) {
-          String positionKey = '$rowIndex-$columnIndex';
-          List<String> players = TeamData().getPlayers(positionKey);
+          String key = '$rowIndex-$columnIndex';
+          Map<String, dynamic>? selectedPlayer = selectedPlayers[key];
 
-          Map<String, dynamic>? playerDetails;
-          if (players.isNotEmpty) {
-            playerDetails = TeamData().getPlayerDetails(players.first);
-          }
+          String position = positions[columnIndex]; // Get position from list
 
-          return SizedBox(
-            width: 75,
-            height: 100,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddPlayersScreen(
-                          columnIndex: columnIndex,
-                          rowIndex: rowIndex,
+          return GestureDetector(
+            onTap: () async {
+              final selected = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddPlayersScreen(
+                    rowIndex: rowIndex,
+                    columnIndex: columnIndex,
+                    position: position,
+                    selecterPlayerList: selectedPlayers,
+                  ),
+                ),
+              );
+
+              if (selected != null) {
+                setState(() {
+                  selectedPlayers[key] = selectedPlayers[key] = {
+                    ...selected,
+                    'rowIndex': rowIndex,
+                    'columnIndex': columnIndex,
+                  };
+                });
+              }
+            },
+            child: selectedPlayer != null
+                ? SizedBox(
+                    width: 75,
+                    height: 100,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          height: 50,
+                          width: 50,
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage(
+                              '${ApiService.baseUrlImg}/${selectedPlayer["logo"]}',
+                            ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 25,
+                              padding: const EdgeInsets.only(top: 5),
+                              decoration:
+                                  const BoxDecoration(color: AppColors.primary),
+                              child: Text(
+                                selectedPlayer["number"].toString(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFFEDEDED),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'BebasNeue',
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 55,
+                              height: 25,
+                              padding: const EdgeInsets.only(top: 5),
+                              decoration: const BoxDecoration(
+                                  color: AppColors.textPrimary),
+                              child: Text(
+                                selectedPlayer["name"],
+                                maxLines: 1,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFF141414),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'BebasNeue',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                : Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration:
+                            const BoxDecoration(color: Color(0xFF353535)),
+                        child: const Icon(
+                          Icons.add,
+                          color: AppColors.textPrimary,
+                          size: 18,
                         ),
                       ),
-                    );
-                  },
-                  child: players.isNotEmpty
-                      ? Container(
-                          margin: const EdgeInsets.only(bottom: 5),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Image.asset(
-                                playerDetails?["image"],
-                                width: 50,
-                                height: 50,
-                              ),
-                            ],
-                          ),
-                        )
-                      : Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration:
-                              const BoxDecoration(color: Color(0xFF353535)),
-                          child: const Icon(
-                            Icons.add,
-                            color: AppColors.textPrimary,
-                            size: 18,
-                          ),
-                        ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Jersey Number
-                    Container(
-                      width: 20,
-                      height: 25,
-                      padding: const EdgeInsets.only(top: 5),
-                      decoration: const BoxDecoration(color: AppColors.primary),
-                      child: players.isNotEmpty
-                          ? Text(
-                              playerDetails?["id"],
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(0xFFEDEDED),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'BebasNeue',
-                              ),
-                            )
-                          : Text(
+                      Row(
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 25,
+                            padding: const EdgeInsets.only(top: 5),
+                            decoration:
+                                const BoxDecoration(color: AppColors.primary),
+                            child: Text(
                               '0${columnIndex + 1}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
@@ -440,27 +498,14 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                                 fontFamily: 'BebasNeue',
                               ),
                             ),
-                    ),
-                    // Player Name or Position
-                    Container(
-                      width: 55,
-                      height: 25,
-                      padding: const EdgeInsets.only(top: 5),
-                      decoration:
-                          const BoxDecoration(color: AppColors.textPrimary),
-                      child: players.isNotEmpty
-                          ? Text(
-                              playerDetails?["name"],
-                              maxLines: 1,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(0xFF141414),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'BebasNeue',
-                              ),
-                            )
-                          : Text(
+                          ),
+                          Container(
+                            width: 50,
+                            height: 25,
+                            padding: const EdgeInsets.only(top: 5),
+                            decoration: const BoxDecoration(
+                                color: AppColors.textPrimary),
+                            child: Text(
                               positions[columnIndex],
                               maxLines: 1,
                               textAlign: TextAlign.center,
@@ -471,11 +516,11 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                                 fontFamily: 'BebasNeue',
                               ),
                             ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
           );
         },
       ),

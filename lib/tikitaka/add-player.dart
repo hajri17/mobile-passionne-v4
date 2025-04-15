@@ -1,17 +1,23 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:passione_app/tikitaka/create-team.dart';
+import 'package:passione_app/services/api_services.dart';
 import 'package:passione_app/tikitaka/profil-player.dart';
-import 'package:passione_app/tikitaka/team-data.dart';
 import 'package:passione_app/widget/colors_page.dart';
 import 'package:passione_app/widget/widget_page.dart';
 
 class AddPlayersScreen extends StatefulWidget {
   final int columnIndex;
   final int rowIndex;
+  final Map<String, Map<String, dynamic>> selecterPlayerList;
+
+  final String position;
   const AddPlayersScreen({
     super.key,
     required this.columnIndex,
     required this.rowIndex,
+    required this.position,
+    required this.selecterPlayerList,
   });
 
   @override
@@ -19,120 +25,38 @@ class AddPlayersScreen extends StatefulWidget {
 }
 
 class _AddPlayersScreenState extends State<AddPlayersScreen> {
-  TextEditingController searchController = TextEditingController();
+  List<Map<String, dynamic>> selectedPlayers = [];
 
-  final List<Map<String, dynamic>> players = [
-    {
-      "id": "1",
-      "image": "assets/images/player_avatar.png",
-      "name": "Darcie Brown",
-      "price": 2,
-      "points": 120,
-    },
-    {
-      "id": "2",
-      "image": "assets/images/player_avatar.png",
-      "name": "hama hama hama Schutt",
-      "price": 9,
-      "points": 210,
-    },
-    {
-      "id": "3",
-      "image": "assets/images/player_avatar.png",
-      "name": "Annabel land",
-      "price": 8,
-      "points": 140,
-    },
-    {
-      "id": "4",
-      "image": "assets/images/player_avatar.png",
-      "name": "Alana King",
-      "price": 6,
-      "points": 180,
-    },
-    {
-      "id": "5",
-      "image": "assets/images/player_avatar.png",
-      "name": "Saulo A. C.",
-      "price": 6,
-      "points": 96,
-    },
-    {
-      "id": "6",
-      "image": "assets/images/player_avatar.png",
-      "name": "Saulo A. C.",
-      "price": 5,
-      "points": 86,
-    },
-    {
-      "id": "7",
-      "image": "assets/images/player_avatar.png",
-      "name": "Darcie Brown",
-      "price": 2,
-      "points": 120,
-    },
-    {
-      "id": "8",
-      "image": "assets/images/player_avatar.png",
-      "name": "Megan Schutt",
-      "price": 9,
-      "points": 210,
-    },
-    {
-      "id": "9",
-      "image": "assets/images/player_avatar.png",
-      "name": "Annabel land",
-      "price": 8,
-      "points": 140,
-    },
-    {
-      "id": "10",
-      "image": "assets/images/player_avatar.png",
-      "name": "Alana King",
-      "price": 6,
-      "points": 180,
-    },
-    {
-      "id": "11",
-      "image": "assets/images/player_avatar.png",
-      "name": "Saulo A. C.",
-      "price": 5,
-      "points": 80,
-    },
-    {
-      "id": "12",
-      "image": "assets/images/player_avatar.png",
-      "name": "Saulo A. C.",
-      "price": 6,
-      "points": 96,
-    },
-    {
-      "id": "13",
-      "image": "assets/images/player_avatar.png",
-      "name": "Saulo A. C.",
-      "price": 5,
-      "points": 86,
-    },
-    {
-      "id": "14",
-      "image": "assets/images/player_avatar.png",
-      "name": "Darcie Brown",
-      "price": 2,
-      "points": 120,
-    },
-    {
-      "id": "15",
-      "image": "assets/images/player_avatar.png",
-      "name": "Megan Schutt",
-      "price": 9,
-      "points": 210,
-    },
-  ];
-  List<Map<String, dynamic>> filteredPlayers = [];
+  TextEditingController searchController = TextEditingController();
+  List<dynamic> players = [];
+  List<dynamic> filteredPlayers = [];
+
+  Future<void> fetchData() async {
+    var position = (widget.position == 'GB')
+        ? 'Goalkeeper'
+        : ((widget.position == 'DF')
+            ? 'Defender'
+            : (widget.position == 'ML')
+                ? 'Midfielder'
+                : (widget.position == 'AT')
+                    ? 'Attacker'
+                    : '');
+    final response = await ApiService.get('player/position/$position');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      setState(() {
+        players = jsonData['data'];
+        filteredPlayers = List.from(players);
+      });
+    } else {
+      throw Exception('Failed to fetch data');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    fetchData();
     filteredPlayers = players;
     searchController.addListener(_filterPlayers);
   }
@@ -149,7 +73,6 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
@@ -167,7 +90,7 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                 const Icon(Icons.sports_soccer, color: AppColors.primary),
                 const SizedBox(width: 4),
                 Text(
-                  "${TeamData().remainingPoints} PTS",
+                  "100 PTS",
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 20,
@@ -238,7 +161,7 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
               ),
             ),
             DataTable(
-              columnSpacing: 10,
+              columnSpacing: 15,
               // border: TableBorder.all(color: Colors.grey.shade900),
               dataRowMaxHeight: 75,
               headingRowHeight: 30,
@@ -265,7 +188,7 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                 ),
                 DataColumn(
                   label: SizedBox(
-                    width: 120,
+                    width: 90,
                     child: Text(
                       "Nom",
                       textAlign: TextAlign.center,
@@ -308,13 +231,13 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                 ),
               ],
               rows: filteredPlayers.asMap().entries.map((entry) {
-                int index = entry.key + 1;
+                // int index = entry.key + 1;
                 Map<String, dynamic> player = entry.value;
                 return DataRow(
                   cells: [
                     DataCell(
                       Text(
-                        "$index",
+                        player["number"].toString(),
                         style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 12,
@@ -325,19 +248,19 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                       Stack(
                         alignment: Alignment.center,
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             height: 40,
                             width: 40,
                             child: CircleAvatar(
-                              backgroundImage:
-                                  AssetImage('assets/images/player_avatar.png'),
+                              backgroundImage: NetworkImage(
+                                  '${ApiService.baseUrlImg}/${player["logo"]}'),
                             ),
                           ),
                           Positioned(
                             bottom: 0,
                             right: 0,
-                            child: Image.asset(
-                              'assets/images/ess_logo.png',
+                            child: Image.network(
+                              '${ApiService.baseUrlImg}/${player["team"]["logo"]}',
                               fit: BoxFit.cover,
                               width: 20,
                             ),
@@ -351,7 +274,7 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => PlayerProfilePage(
-                              playerId: player["id"],
+                              playerId: player["_id"],
                             ),
                           ),
                         );
@@ -361,13 +284,13 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                         maxLines: 3,
                         style: const TextStyle(
                           color: AppColors.textPrimary,
-                          fontSize: 12,
+                          fontSize: 10,
                         ),
                       ),
                     ),
                     DataCell(
                       Text(
-                        player["price"].toString(),
+                        player["age"].toString(),
                         style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 12,
@@ -376,7 +299,7 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                     ),
                     DataCell(
                       Text(
-                        player["points"].toString(),
+                        player["number"].toString(),
                         style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 12,
@@ -384,7 +307,7 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
                       ),
                     ),
                     DataCell(
-                      _buildAddPlayer(player, player["price"]),
+                      _buildAddPlayer(player, player["age"], selectedPlayers),
                     ),
                   ],
                 );
@@ -397,40 +320,26 @@ class _AddPlayersScreenState extends State<AddPlayersScreen> {
     );
   }
 
-  Widget _buildAddPlayer(Map<String, dynamic> player, int playerPoints) {
-    var playerId = player['id'];
-    bool isSelected = TeamData().isPlayerSelected(playerId);
+  Widget _buildAddPlayer(Map<String, dynamic> player, int playerPoints,
+      List<Map<String, dynamic>> selectedPlayers) {
+    var playerId = player['_id'];
+    var selectedPlayersList = widget.selecterPlayerList;
 
+    bool isSelected =
+        selectedPlayersList.values.any((p) => p['_id'] == playerId);
     return GestureDetector(
       onTap: () {
-        if (isSelected) {
-          null;
-        } else {
-          TeamData().addOrUpdatePlayer(
-            '${widget.rowIndex}-${widget.columnIndex}',
-            playerId,
-            playerPoints,
-          );
+        if (!isSelected) {
+          setState(() {
+            selectedPlayers.add(player);
+          });
 
-          // TeamData().updatePlayerAtPosition(
-          //   '${widget.rowIndex}-${widget.columnIndex}',
-          //   playerId,
-          // );
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CreateTeamScreen(
-                player: player,
-                rowIndex: widget.rowIndex,
-                columnIndex: widget.columnIndex,
-              ),
-            ),
-          );
+          Future.delayed(Duration(milliseconds: 500), () {
+            Navigator.pop(context, player);
+          });
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
         width: 75,
         decoration: BoxDecoration(
           color: isSelected ? AppColors.cardBackground : AppColors.primary,

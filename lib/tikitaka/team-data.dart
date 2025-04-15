@@ -20,10 +20,7 @@ class TeamData {
   }
 
   void addOrUpdatePlayer(
-    String positionKey,
-    String playerId,
-    int playerPoints,
-  ) {
+      String positionKey, String playerId, int playerPoints) {
     if (selectedPlayers.containsKey(positionKey)) {
       String oldPlayerId = selectedPlayers[positionKey]!.first;
       int oldPlayerPoints = playerPointsMap[oldPlayerId] ?? 0;
@@ -34,7 +31,7 @@ class TeamData {
     if (remainingPoints >= playerPoints) {
       selectedPlayers[positionKey] = [playerId];
       playerPointsMap[playerId] = playerPoints;
-      remainingPoints -= playerPoints;
+      updateRemainingPoints(); // Ensure remaining points update correctly
     } else {
       print("Not enough points to select this player!");
     }
@@ -65,122 +62,6 @@ class TeamData {
 
   List<String> getPlayers(String key) {
     return selectedPlayers[key] ?? [];
-  }
-
-  Map<String, dynamic>? getPlayerDetails(String playerId) {
-    final List<Map<String, dynamic>> players = [
-      {
-        "id": "1",
-        "image": "assets/images/player_avatar.png",
-        "name": "Darcie Brown",
-        "price": 2,
-        "points": 120,
-      },
-      {
-        "id": "2",
-        "image": "assets/images/ess_logo.png",
-        "name": "hama hama hama Schutt",
-        "price": 9,
-        "points": 210,
-      },
-      {
-        "id": "3",
-        "image": "assets/images/player_avatar.png",
-        "name": "Annabel land",
-        "price": 8,
-        "points": 140,
-      },
-      {
-        "id": "4",
-        "image": "assets/images/player_avatar.png",
-        "name": "Alana King",
-        "price": 6,
-        "points": 180,
-      },
-      {
-        "id": "5",
-        "image": "assets/images/player_avatar.png",
-        "name": "Saulo A. C.",
-        "price": 6,
-        "points": 96,
-      },
-      {
-        "id": "6",
-        "image": "assets/images/player_avatar.png",
-        "name": "Saulo A. C.",
-        "price": 5,
-        "points": 86,
-      },
-      {
-        "id": "7",
-        "image": "assets/images/player_avatar.png",
-        "name": "Darcie Brown",
-        "price": 2,
-        "points": 120,
-      },
-      {
-        "id": "8",
-        "image": "assets/images/player_avatar.png",
-        "name": "Megan Schutt",
-        "price": 9,
-        "points": 210,
-      },
-      {
-        "id": "9",
-        "image": "assets/images/player_avatar.png",
-        "name": "Annabel land",
-        "price": 8,
-        "points": 140,
-      },
-      {
-        "id": "10",
-        "image": "assets/images/player_avatar.png",
-        "name": "Alana King",
-        "price": 6,
-        "points": 180,
-      },
-      {
-        "id": "11",
-        "image": "assets/images/player_avatar.png",
-        "name": "Saulo A. C.",
-        "price": 5,
-        "points": 80,
-      },
-      {
-        "id": "12",
-        "image": "assets/images/player_avatar.png",
-        "name": "Saulo A. C.",
-        "price": 6,
-        "points": 96,
-      },
-      {
-        "id": "13",
-        "image": "assets/images/player_avatar.png",
-        "name": "Saulo A. C.",
-        "price": 5,
-        "points": 86,
-      },
-      {
-        "id": "14",
-        "image": "assets/images/player_avatar.png",
-        "name": "Darcie Brown",
-        "price": 2,
-        "points": 120,
-      },
-      {
-        "id": "15",
-        "image": "assets/images/player_avatar.png",
-        "name": "Megan Schutt",
-        "price": 9,
-        "points": 210,
-      },
-    ];
-
-    // Find the player by ID
-    return players.firstWhere(
-      (player) => player["id"] == playerId,
-      orElse: () => {}, // Return an empty map if player not found
-    );
   }
 
   int getTotalPlayersCount() {

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:passione_app/services/api_services.dart';
 import 'package:passione_app/widget/colors_page.dart';
 import 'package:passione_app/widget/widget_page.dart';
 
@@ -15,36 +19,31 @@ class QuizPageState extends State<QuizPage> {
   bool isAnswered = false;
   bool isCorrect = false;
 
-  final List<Map<String, dynamic>> questions = [
-    {
-      "question": "Quel est le du CSS ?",
-      "image": "assets/images/jmal.png",
-      "answers": [
-        {"index": "A", "text": "Stade Taïeb-Mehiri", "correct": true},
-        {"index": "B", "text": "Stade Olympique De Beja", "correct": false},
-        {"index": "C", "text": "Stade Mehri El Akermi", "correct": false},
-        {"index": "D", "text": "Stade Mokhtar El Far", "correct": false},
-      ]
-    },
-    {
-      "question":
-          "Quel est le nom du stade associé au club de football du CSS ?",
-      "image": "assets/images/jmal.png",
-      "answers": [
-        {"index": "A", "text": "Stade Taïeb-Mehiri", "correct": true},
-        {"index": "B", "text": "Stade Olympique De Beja", "correct": false},
-        {"index": "C", "text": "Stade Mehri El Akermi", "correct": false},
-        {"index": "D", "text": "Stade Mokhtar El Far", "correct": false},
-      ]
+  List<dynamic> questions = [];
+
+  Future<void> fetchData() async {
+    final response = await ApiService.get('quiz');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      setState(() {
+        questions = jsonData['quizzes'][0]['questions'];
+      });
+    } else {
+      throw Exception('Failed to fetch data');
     }
-  ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
   void checkAnswer(String answer, bool correct) {
     setState(() {
       selectedAnswer = answer;
       isAnswered = true;
       isCorrect = correct;
-      showSuccessPopup(context);
     });
 
     Future.delayed(const Duration(seconds: 1), () {
@@ -52,8 +51,10 @@ class QuizPageState extends State<QuizPage> {
         currentQuestionIndex++;
         selectedAnswer = '';
         isAnswered = false;
+
         if (currentQuestionIndex >= questions.length) {
-          currentQuestionIndex = 0;
+          showSuccessPopup(context);
+          currentQuestionIndex = 0; // Reset le quiz après la fin
         }
       });
     });
@@ -79,7 +80,7 @@ class QuizPageState extends State<QuizPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  'BON TRAVAIL',
+                  'BRAVO',
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 50.0,
@@ -88,81 +89,41 @@ class QuizPageState extends State<QuizPage> {
                   ),
                 ),
                 const SizedBox(height: 24.0),
-                SizedBox(
-                  width: 144.35,
-                  height: 144.35,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        child: Container(
-                          width: 144.35,
-                          height: 144.35,
-                          decoration: ShapeDecoration(
-                            color: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                width: 1.20,
-                                color: AppColors.textPrimary,
-                              ),
-                              borderRadius: BorderRadius.circular(144.35),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: 25.26,
-                        top: 25.26,
-                        child: Container(
-                          width: 93.83,
-                          height: 93.83,
-                          decoration: ShapeDecoration(
-                            color: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                width: 1.20,
-                                color: AppColors.textPrimary,
-                              ),
-                              borderRadius: BorderRadius.circular(144.35),
-                            ),
-                            shadows: const [
-                              BoxShadow(
-                                color: Color(0xFF273121),
-                                blurRadius: 38.49,
-                                offset: Offset(0, 19.25),
-                                spreadRadius: 0,
-                              )
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.check_rounded,
-                            color: AppColors.textPrimary,
-                            size: 50.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                SvgPicture.asset(
+                  'assets/images/check.svg',
+                  width: 160,
+                  height: 160,
                 ),
                 const SizedBox(height: 24.0),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.star_rate_rounded,
-                      color: Colors.yellow,
-                      size: 40.0,
+                    SvgPicture.asset(
+                      'assets/images/star.svg',
+                      width: 40,
+                      height: 40,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFFFE55A),
+                        BlendMode.srcIn,
+                      ),
                     ),
-                    Icon(
-                      Icons.star_rate_rounded,
-                      color: Colors.yellow,
-                      size: 80.0,
+                    SvgPicture.asset(
+                      'assets/images/star.svg',
+                      width: 65,
+                      height: 65,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFFFFE55A),
+                        BlendMode.srcIn,
+                      ),
                     ),
-                    Icon(
-                      Icons.star_rate_rounded,
-                      color: Colors.grey,
-                      size: 40.0,
+                    SvgPicture.asset(
+                      'assets/images/star.svg',
+                      width: 40,
+                      height: 40,
+                      colorFilter: const ColorFilter.mode(
+                        Color(0xFF353535),
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ],
                 ),
@@ -273,9 +234,13 @@ class QuizPageState extends State<QuizPage> {
               const SizedBox(height: 20),
               Image.asset(question["image"], fit: BoxFit.cover),
               const SizedBox(height: 20),
-              ...question["answers"].map((answer) {
-                bool isSelected = selectedAnswer == answer["text"];
-                Color buttonColor = AppColors.cardBackground;
+              ...question["options"].asMap().entries.map((entry) {
+                final index = entry.key as int;
+                final answer = entry.value;
+                final letter = String.fromCharCode(65 + index); // A, B, C, etc.
+
+                final isSelected = selectedAnswer == answer["text"];
+                Color buttonColor = const Color(0xFF323232);
 
                 if (isAnswered && isSelected) {
                   buttonColor =
@@ -285,26 +250,21 @@ class QuizPageState extends State<QuizPage> {
                 return GestureDetector(
                   onTap: () => isAnswered
                       ? null
-                      : checkAnswer(answer["text"], answer["correct"]),
+                      : checkAnswer(answer["text"], answer["isCorrect"]),
                   child: Container(
                     width: 340,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 7,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
                     margin: const EdgeInsets.only(bottom: 15),
                     decoration: ShapeDecoration(
                       color: buttonColor,
                       shape: const RoundedRectangleBorder(
                         side: BorderSide(
-                          width: 1,
-                          color: AppColors.greyBackground,
-                        ),
+                            width: 1, color: AppColors.greyBackground),
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
@@ -317,14 +277,15 @@ class QuizPageState extends State<QuizPage> {
                                   width: 1, color: AppColors.greyBackground),
                             ),
                           ),
-                          child: Text(
-                            answer["index"],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 24,
-                              fontFamily: 'BebasNeue',
-                              fontWeight: FontWeight.w400,
+                          child: Center(
+                            child: Text(
+                              letter,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 24,
+                                fontFamily: 'BebasNeue',
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           ),
                         ),
@@ -332,7 +293,7 @@ class QuizPageState extends State<QuizPage> {
                         SizedBox(
                           width: 250,
                           child: Text(
-                            answer["text"],
+                            answer["text"] ?? '',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:passione_app/services/api_services.dart';
 import 'package:passione_app/widget/colors_page.dart';
 
 Widget buildHeader(String title, String subtitle) {
@@ -50,9 +51,9 @@ class CustomAppBarWithSideMenu extends StatelessWidget
   final VoidCallback onMenuPressed;
 
   const CustomAppBarWithSideMenu({
-    Key? key,
+    super.key,
     required this.onMenuPressed,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -68,31 +69,54 @@ class CustomAppBarWithSideMenu extends StatelessWidget
           const SizedBox(width: 10),
           const CircleAvatar(
             radius: 18,
-            backgroundImage: AssetImage(
-              'assets/images/ess_logo.png',
-            ),
+            backgroundImage: AssetImage('assets/images/ess_logo.png'),
           ),
           const SizedBox(width: 10),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'FOULEN BEN FOULEN',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: 'BebasNeue',
-                ),
-              ),
-              Text(
-                'Username',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontFamily: 'BebasNeue',
-                ),
-              ),
-            ],
+
+          // Wrap your Text widgets with FutureBuilder
+          FutureBuilder<String?>(
+            future: ApiService.getDataFromShared('connected_userName'),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator(); // Show loading indicator
+              }
+              if (snapshot.hasError) {
+                return const Text(
+                  'Error loading username',
+                  style: TextStyle(color: Colors.red),
+                );
+              }
+
+              final username = snapshot.data ?? 'Guest';
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    username,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'BebasNeue',
+                    ),
+                  ),
+                  FutureBuilder<String?>(
+                    future: ApiService.getDataFromShared('connected_name'),
+                    builder: (context, nameSnapshot) {
+                      final name = nameSnapshot.data ?? 'User';
+                      return Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontFamily: 'BebasNeue',
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           ),
           const Spacer(),
           Container(

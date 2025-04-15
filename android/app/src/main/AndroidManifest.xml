@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.devitgroup.passionne12_app">
     <application
-        android:label="passione_app"
+        android:label="Passioné 12"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -120,14 +120,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLoading = true;
     });
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const MyApp(
-          isAuthenticated: true,
-        ),
-      ),
-    );
+
     try {
       var res = await ApiService.postWithoutToken(
         'auth/login',

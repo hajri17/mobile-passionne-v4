@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MainPage extends StatefulWidget {
-  final int initialIndex; // Accept initial index
+  final int initialIndex;
   const MainPage({super.key, this.initialIndex = 0});
 
   @override
@@ -234,11 +234,11 @@ class MainPageState extends State<MainPage> {
       case 1:
         return const LeagueClassificationPage();
       case 2:
-        return const Center();
+        return const TikitakaPage();
       case 3:
         return const LeaderboardPage();
       case 4:
-        return const TikitakaPage();
+        return const Center();
       case 5:
         return const UserSettingsPage();
       case 6:

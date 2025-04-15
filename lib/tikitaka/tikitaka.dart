@@ -1,9 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:passione_app/services/api_services.dart';
 import 'package:passione_app/tikitaka/add-player.dart';
 import 'package:passione_app/tikitaka/create-team.dart';
 import 'package:passione_app/tikitaka/profil-player.dart';
-import 'package:passione_app/tikitaka/team-data.dart';
 import 'package:passione_app/widget/colors_page.dart';
 import 'package:passione_app/widget/widget_page.dart';
 
@@ -16,203 +17,7 @@ class TikitakaPage extends StatefulWidget {
 
 class _TikitakaPageState extends State<TikitakaPage> {
   String selectedJournee = 'Journée 1';
-
-  List<Map<String, dynamic>> pickteam = [
-    {
-      "user_id": "67caee189cf55debab2db9a0",
-      "players": [
-        // Goalkeeper
-        {
-          "player_id": 1,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "1",
-            "image": "assets/images/player_avatar.png",
-            "name": "Goalkeeper 1",
-            "position": "GK",
-            "price": 5,
-            "points": 90,
-          },
-        },
-
-        // Defenders
-        {
-          "player_id": 2,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "2",
-            "image": "assets/images/player_avatar.png",
-            "name": "Defender 1",
-            "position": "DF",
-            "price": 7,
-            "points": 120,
-          },
-        },
-        {
-          "player_id": 3,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "3",
-            "image": "assets/images/player_avatar.png",
-            "name": "Defender 2",
-            "position": "DF",
-            "price": 6,
-            "points": 100,
-          },
-        },
-        {
-          "player_id": 4,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "4",
-            "image": "assets/images/player_avatar.png",
-            "name": "Defender 3",
-            "position": "DF",
-            "price": 6,
-            "points": 95,
-          },
-        },
-        {
-          "player_id": 5,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "5",
-            "image": "assets/images/player_avatar.png",
-            "name": "Defender 4",
-            "position": "DF",
-            "price": 5,
-            "points": 85,
-          },
-        },
-
-        // Midfielders
-        {
-          "player_id": 6,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "6",
-            "image": "assets/images/player_avatar.png",
-            "name": "Midfielder 1",
-            "position": "MF",
-            "price": 8,
-            "points": 140,
-          },
-        },
-        {
-          "player_id": 7,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "7",
-            "image": "assets/images/player_avatar.png",
-            "name": "Midfielder 2",
-            "position": "MF",
-            "price": 7,
-            "points": 130,
-          },
-        },
-        {
-          "player_id": 8,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "8",
-            "image": "assets/images/player_avatar.png",
-            "name": "Midfielder 3",
-            "position": "MF",
-            "price": 6,
-            "points": 110,
-          },
-        },
-        {
-          "player_id": 9,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "9",
-            "image": "assets/images/player_avatar.png",
-            "name": "Midfielder 4",
-            "position": "MF",
-            "price": 5,
-            "points": 100,
-          },
-        },
-
-        // Attackers
-        {
-          "player_id": 10,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "10",
-            "image": "assets/images/player_avatar.png",
-            "name": "Forward 1",
-            "position": "FW",
-            "price": 9,
-            "points": 200,
-          },
-        },
-        {
-          "player_id": 11,
-          "isSubstituted": false,
-          "player_details": {
-            "id": "11",
-            "image": "assets/images/player_avatar.png",
-            "name": "Forward 2",
-            "position": "FW",
-            "price": 8,
-            "points": 180,
-          },
-        },
-
-        // Substitutes
-        {
-          "player_id": 12,
-          "isSubstituted": true,
-          "player_details": {
-            "id": "12",
-            "image": "assets/images/player_avatar.png",
-            "name": "Sub GK",
-            "position": "GK",
-            "price": 4,
-            "points": 80,
-          },
-        },
-        {
-          "player_id": 13,
-          "isSubstituted": true,
-          "player_details": {
-            "id": "13",
-            "image": "assets/images/player_avatar.png",
-            "name": "Sub DF",
-            "position": "DF",
-            "price": 5,
-            "points": 90,
-          },
-        },
-        {
-          "player_id": 14,
-          "isSubstituted": true,
-          "player_details": {
-            "id": "14",
-            "image": "assets/images/player_avatar.png",
-            "name": "Sub MF",
-            "position": "MF",
-            "price": 6,
-            "points": 100,
-          },
-        },
-        {
-          "player_id": 15,
-          "isSubstituted": true,
-          "player_details": {
-            "id": "15",
-            "image": "assets/images/player_avatar.png",
-            "name": "Sub FW",
-            "position": "FW",
-            "price": 7,
-            "points": 110,
-          },
-        },
-      ]
-    }
-  ];
+  List<dynamic> pickteam = [];
 
   final List<String> journees = List.generate(
     36,
@@ -221,17 +26,23 @@ class _TikitakaPageState extends State<TikitakaPage> {
 
   Future<void> checkIfPickTeamExiste() async {
     try {
-      String? userId = await ApiService.getDataFromShared('userId');
-      if (userId == null) {
+      // var responseRound = await ApiService.get('fixture/next-round');
+      // final dataRound = json.decode(responseRound.body);
+      // selectedJournee = dataRound['round'];
+
+      String? userId = await ApiService.getDataFromShared('connected_id');
+      var response = await ApiService.get('pickteam/$userId/$selectedJournee');
+      final jsonData = json.decode(response.body);
+      setState(() {
+        pickteam = jsonData['data']['players'];
+      });
+
+      if (userId == null && response.statusCode != 200) {
         if (!mounted) return;
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return const CreateTeamScreen(
-              player: {},
-              rowIndex: 0,
-              columnIndex: 0,
-            );
+            return const CreateTeamScreen();
           },
         );
       }
@@ -246,21 +57,18 @@ class _TikitakaPageState extends State<TikitakaPage> {
     checkIfPickTeamExiste();
   }
 
-  List<Map<String, dynamic>> getSubstitutes(
-      List<Map<String, dynamic>> players) {
+  List<dynamic> getSubstitutes(List<dynamic> players) {
     return players.where((player) => player['isSubstituted'] == true).toList();
   }
 
-  List<Map<String, dynamic>> getActivePlayers(
-      List<Map<String, dynamic>> players) {
+  List<dynamic> getActivePlayers(List<dynamic> players) {
     return players.where((player) => player['isSubstituted'] == false).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> players = pickteam[0]["players"];
-    List<Map<String, dynamic>> substitutes = getSubstitutes(players);
-    List<Map<String, dynamic>> activePlayers = getActivePlayers(players);
+    List<dynamic> substitutes = getSubstitutes(pickteam);
+    List<dynamic> activePlayers = getActivePlayers(pickteam);
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -276,11 +84,11 @@ class _TikitakaPageState extends State<TikitakaPage> {
                   colors: [Color(0xFF629F3F), Color(0xFF121212)],
                 ),
               ),
-              child: const Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'VOTRE ÉQUIPE',
                     style: TextStyle(
                       color: AppColors.textPrimary,
@@ -290,14 +98,14 @@ class _TikitakaPageState extends State<TikitakaPage> {
                     ),
                   ),
                   Text(
-                    "Journée 1 deadline:",
+                    "$selectedJournee deadline:",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 12,
                     ),
                   ),
-                  Row(
+                  const Row(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,25 +411,25 @@ class _TikitakaPageState extends State<TikitakaPage> {
                         _buildSoccerRow(
                           activePlayers
                               .where((p) =>
-                                  p['player_details']['position'] == "GK")
+                                  p['player']['position'] == "Goalkeeper")
+                              .toList(),
+                        ),
+                        _buildSoccerRow(
+                          activePlayers
+                              .where(
+                                  (p) => p['player']['position'] == "Defender")
                               .toList(),
                         ),
                         _buildSoccerRow(
                           activePlayers
                               .where((p) =>
-                                  p['player_details']['position'] == "DF")
+                                  p['player']['position'] == "Midfielder")
                               .toList(),
                         ),
                         _buildSoccerRow(
                           activePlayers
-                              .where((p) =>
-                                  p['player_details']['position'] == "MF")
-                              .toList(),
-                        ),
-                        _buildSoccerRow(
-                          activePlayers
-                              .where((p) =>
-                                  p['player_details']['position'] == "FW")
+                              .where(
+                                  (p) => p['player']['position'] == "Attacker")
                               .toList(),
                         ),
                       ],
@@ -658,14 +466,12 @@ class _TikitakaPageState extends State<TikitakaPage> {
     );
   }
 
-  Widget _buildSoccerRow(List<Map<String, dynamic>> players) {
+  Widget _buildSoccerRow(List<dynamic> players) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: players.map((player) {
-        Map<String, dynamic> playerDetails = player['player_details'];
-
         return GestureDetector(
-          onTap: () => _showPlayerOptions(context, playerDetails),
+          onTap: () => _showPlayerOptions(context, player['player']),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -676,12 +482,20 @@ class _TikitakaPageState extends State<TikitakaPage> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Image.asset(
-                      playerDetails["image"],
-                      width: 50,
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
                       height: 50,
+                      width: 50,
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          '${ApiService.baseUrlImg}/${player['player']['logo']}',
+                        ),
+                      ),
                     ),
-                    if (playerDetails["id"] == "1")
+                    if (player["captain"])
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -690,7 +504,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                           width: 25,
                         ),
                       )
-                    else if (playerDetails["id"] == "2")
+                    else if (player["isInjured"])
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -699,7 +513,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                           width: 25,
                         ),
                       )
-                    else if (playerDetails["id"] == "3")
+                    else if (player["mvp"])
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -708,7 +522,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                           width: 25,
                         ),
                       )
-                    else if (playerDetails["id"] == "4")
+                    else if (player["vicecaptain"])
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -717,7 +531,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                           width: 25,
                         ),
                       )
-                    else if (playerDetails["id"] == "5")
+                    else if (player["redCard"])
                       Positioned(
                         bottom: 0,
                         right: 0,
@@ -740,7 +554,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                     padding: const EdgeInsets.only(top: 5),
                     decoration: const BoxDecoration(color: AppColors.primary),
                     child: Text(
-                      playerDetails["id"],
+                      player['player']["number"].toString(),
                       maxLines: 1,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
@@ -758,7 +572,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                     decoration:
                         const BoxDecoration(color: AppColors.textPrimary),
                     child: Text(
-                      playerDetails["name"],
+                      player['player']["name"],
                       maxLines: 1,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
@@ -808,6 +622,8 @@ class _TikitakaPageState extends State<TikitakaPage> {
                     builder: (context) => AddPlayersScreen(
                       columnIndex: 4,
                       rowIndex: 5,
+                      position: playerDetails['position'],
+                      selecterPlayerList: const {},
                     ),
                   ),
                 );
@@ -815,7 +631,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
               const Divider(height: 0),
               _menuOption("assets/images/captain1.png", "Rôle du Joueur", () {
                 Navigator.pop(context);
-                _showCaptainAndViceCaptain(context);
+                _showCaptainAndViceCaptain(context, playerDetails['_id']);
               }),
               const Divider(height: 0),
               _menuOption("assets/images/profile.png", "Profile du Joueur", () {
@@ -823,7 +639,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => PlayerProfilePage(
-                      playerId: playerDetails["id"],
+                      playerId: playerDetails["_id"],
                     ),
                   ),
                 );
@@ -840,7 +656,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                   Navigator.of(context).pop();
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFFD6D5D5),
+                  backgroundColor: const Color(0xFFD6D5D5),
                   minimumSize: const Size(
                     double.infinity,
                     48,
@@ -870,7 +686,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
     );
   }
 
-  void _showCaptainAndViceCaptain(BuildContext context) {
+  void _showCaptainAndViceCaptain(BuildContext context, playerDetailId) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -886,11 +702,35 @@ class _TikitakaPageState extends State<TikitakaPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _menuOption("assets/images/captain.png", "CAPITANO", () {
-                Navigator.pop(context);
+              _menuOption("assets/images/captain.png", "CAPITANO", () async {
+                String? userId =
+                    await ApiService.getDataFromShared('connected_id');
+                Map<String, dynamic> requestBody = {
+                  "playerId": playerDetailId,
+                  "round": selectedJournee,
+                };
+
+                final response = await ApiService.update(
+                    'pickteam/captain/$userId', requestBody);
+                print('response.body : ${response.body}');
+
+                // Navigator.pop(context);
               }),
               const Divider(height: 0),
-              _menuOption("assets/images/vice.png", "DEUXIEME CAPITANO", () {
+              _menuOption("assets/images/vice.png", "DEUXIEME CAPITANO",
+                  () async {
+                String? userId =
+                    await ApiService.getDataFromShared('connected_id');
+                Map<String, dynamic> requestBody = {
+                  "playerId": playerDetailId,
+                  "round": selectedJournee,
+                };
+
+                final response = await ApiService.update(
+                    'pickteam/vice-captain/$userId', requestBody);
+                print('response.body : ${response.body}');
+
+                // Navigator.pop(context);
                 Navigator.pop(context);
               }),
             ],
@@ -964,41 +804,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            List<Map<String, dynamic>> substitutes = [
-              {
-                "name": "Player 1",
-                "image": "assets/images/player_avatar.png",
-                "id": 1,
-                "a": 1,
-                "p": 1,
-                "s": 1
-              },
-              {
-                "name": "Annabel Land",
-                "image": "assets/images/player_avatar.png",
-                "id": 2,
-                "a": 1,
-                "p": 1,
-                "s": 1
-              },
-              {
-                "name": "Player 3",
-                "image": "assets/images/player_avatar.png",
-                "id": 3,
-                "a": 1,
-                "p": 1,
-                "s": 1
-              },
-              {
-                "name": "Player 4",
-                "image": "assets/images/player_avatar.png",
-                "id": 4,
-                "a": 1,
-                "p": 1,
-                "s": 1
-              },
-            ];
-
+            List<dynamic> substitutes = getSubstitutes(pickteam);
             return AlertDialog(
               backgroundColor: AppColors.cardBackground,
               shape: RoundedRectangleBorder(
@@ -1065,7 +871,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                     ),
                   ),
                   SizedBox(
-                    height: 220,
+                    height: 240,
                     child: ListView.builder(
                       itemCount: substitutes.length,
                       itemBuilder: (context, index) {
@@ -1080,7 +886,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                                   () {
                                 // Navigator.pop(context);
                                 _showConfirmationDialog(
-                                    context, playerDetails, player);
+                                    context, player['player'], playerDetails);
                               });
                             });
                           },
@@ -1099,28 +905,30 @@ class _TikitakaPageState extends State<TikitakaPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                CustomText(text: "${index + 1}"),
+                                CustomText(
+                                    text: "${player['player']["number"]}"),
                                 SizedBox(
                                   width: 100,
                                   child: Row(
                                     children: [
                                       Stack(
+                                        alignment: Alignment.center,
                                         children: [
                                           SizedBox(
-                                            height: 35,
-                                            width: 35,
+                                            height: 40,
+                                            width: 40,
                                             child: CircleAvatar(
-                                              backgroundImage:
-                                                  AssetImage(player["image"]),
+                                              backgroundImage: NetworkImage(
+                                                  '${ApiService.baseUrlImg}/${player['player']['logo']}'),
                                             ),
                                           ),
                                           Positioned(
                                             bottom: 0,
                                             right: 0,
-                                            child: Image.asset(
-                                              'assets/images/ess_logo.png',
+                                            child: Image.network(
+                                              '${ApiService.baseUrlImg}/${player['player']["team"]['logo']}',
                                               fit: BoxFit.cover,
-                                              width: 14,
+                                              width: 20,
                                             ),
                                           ),
                                         ],
@@ -1128,19 +936,19 @@ class _TikitakaPageState extends State<TikitakaPage> {
                                       const SizedBox(width: 5),
                                       Flexible(
                                         child: Text(
-                                          player["name"],
+                                          player['player']["name"],
                                           style: const TextStyle(
                                             color: AppColors.textPrimary,
-                                            fontSize: 12,
+                                            fontSize: 10,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                CustomText(text: "${player["a"]}"),
-                                CustomText(text: "${player["p"]}"),
-                                CustomText(text: "${player["s"]}"),
+                                CustomText(text: "${player['player']["age"]}"),
+                                CustomText(text: "${player['player']["age"]}"),
+                                CustomText(text: "${player['player']["age"]}"),
                               ],
                             ),
                           ),
@@ -1158,7 +966,6 @@ class _TikitakaPageState extends State<TikitakaPage> {
                   child: TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      _showPlayerOptions(context, playerDetails);
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: AppColors.textPrimary,
@@ -1194,7 +1001,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
   }
 
   void _showConfirmationDialog(BuildContext context,
-      Map<String, dynamic> oldPlayer, Map<String, dynamic> newPlayer) {
+      Map<String, dynamic> newPlayer, Map<String, dynamic> oldPlayer) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1261,7 +1068,8 @@ class _TikitakaPageState extends State<TikitakaPage> {
                         height: 75,
                         width: 75,
                         child: CircleAvatar(
-                          backgroundImage: AssetImage(oldPlayer["image"]),
+                          backgroundImage: NetworkImage(
+                              '${ApiService.baseUrlImg}/${oldPlayer['logo']}'),
                         ),
                       ),
                       const Positioned(
@@ -1269,7 +1077,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                         right: 0,
                         child: Icon(
                           Icons.arrow_downward,
-                          size: 25,
+                          size: 50,
                           color: AppColors.alertRed,
                         ),
                       ),
@@ -1290,7 +1098,8 @@ class _TikitakaPageState extends State<TikitakaPage> {
                         height: 75,
                         width: 75,
                         child: CircleAvatar(
-                          backgroundImage: AssetImage(newPlayer["image"]),
+                          backgroundImage: NetworkImage(
+                              '${ApiService.baseUrlImg}/${newPlayer['logo']}'),
                         ),
                       ),
                       const Positioned(
@@ -1298,7 +1107,7 @@ class _TikitakaPageState extends State<TikitakaPage> {
                         right: 0,
                         child: Icon(
                           Icons.arrow_upward,
-                          size: 25,
+                          size: 50,
                           color: AppColors.primary,
                         ),
                       ),
@@ -1342,41 +1151,26 @@ class _TikitakaPageState extends State<TikitakaPage> {
                       String? userId =
                           await ApiService.getDataFromShared('connected_id');
 
-                      if (userId == null) {
-                        return;
-                      }
-
-                      List<String> playersList = TeamData()
-                          .selectedPlayers
-                          .values
-                          .expand(
-                              (players) => players.map((playerId) => playerId))
-                          .toList();
-
                       Map<String, dynamic> requestBody = {
-                        "points": 100,
-                        "round": "Journée 1",
-                        "user_id": userId,
-                        "players": playersList,
+                        "playerToBeTransfert": oldPlayer['_id'],
+                        "newPlayerId": newPlayer['_id'],
                       };
-                      showSuccessPopup(context);
 
-                      print('requestBody: $requestBody');
-                      if (TeamData().getTotalPlayersCount() == 15) {
-                        // try {
-                        //   final response =
-                        //       await ApiService.post('/save-team', requestBody);
+                      print('requestBody 1: $requestBody');
+                      try {
+                        final response = await ApiService.update(
+                            'pickteam/transfer/$userId', requestBody);
+                        print('requestBody: ${response.body}');
 
-                        //   if (response.statusCode == 200) {
-                        //     print('Players saved successfully!');
-                        //     if (!mounted) return;
-                        //     showSuccessPopup(context);
-                        //   } else {
-                        //     print('Failed to save players: ${response.body}');
-                        //   }
-                        // } catch (e) {
-                        //   print('Error saving players: $e');
-                        // }
+                        if (response.statusCode == 200) {
+                          print('Players saved successfully!');
+                          if (!mounted) return;
+                          showSuccessPopup(context);
+                        } else {
+                          print('Failed to save players: ${response.body}');
+                        }
+                      } catch (e) {
+                        print('Error saving players: $e');
                       }
                     },
                     style: ElevatedButton.styleFrom(
